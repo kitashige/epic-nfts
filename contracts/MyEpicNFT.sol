@@ -23,6 +23,9 @@ contract MyEpicNFT is ERC721URIStorage {
     // _tokenIdsを初期化（_tokenIds = 0）
     Counters.Counter private _tokenIds;
 
+    //NFTのMINT価格
+    uint256 public mintCost = 0.001 ether;
+
     // SVGコードを作成します。
     // 変更されるのは、表示される単語だけです。
     // すべてのNFTにSVGコードを適用するために、baseSvg変数を作成します。
@@ -149,9 +152,12 @@ contract MyEpicNFT is ERC721URIStorage {
     }
 
     // ユーザーが NFT を取得するために実行する関数です。
-    function makeAnEpicNFT() public {
+    function makeAnEpicNFT() public payable {
         // 現在のtokenIdを取得します。tokenIdは0から始まります。
         uint256 newItemId = _tokenIds.current();
+
+        //MINT時の購入価格をチェックする
+        require(msg.value >= mintCost, "Not enough ether to purchase NFTs.");
 
         // 3つの配列からそれぞれ1つの単語をランダムに取り出します。
         string memory first = pickRandomFirstWord(newItemId);
