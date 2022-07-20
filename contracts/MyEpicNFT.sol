@@ -5,6 +5,7 @@ pragma solidity ^0.8.4;
 // いくつかの OpenZeppelin のコントラクトをインポートします。
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 // utils ライブラリをインポートして文字列の処理を行います。
@@ -17,7 +18,7 @@ import {Base64} from "./libraries/Base64.sol";
 
 // インポートした OpenZeppelin のコントラクトを継承しています。
 // 継承したコントラクトのメソッドにアクセスできるようになります。
-contract MyEpicNFT is ERC721URIStorage, Ownable {
+contract MyEpicNFT is ERC721URIStorage, ERC2981, Ownable {
     // OpenZeppelin が tokenIds を簡単に追跡するために提供するライブラリを呼び出しています
     using Counters for Counters.Counter;
 
@@ -26,6 +27,10 @@ contract MyEpicNFT is ERC721URIStorage, Ownable {
 
     //NFTのMINT価格
     uint256 public mintCost = 0.001 ether;
+
+    //ロイヤリティーの設定
+    address public royaltyAddress;
+    uint96 public royaltyFee = 500;
 
     // SVGコードを作成します。
     // 変更されるのは、表示される単語だけです。
@@ -93,6 +98,9 @@ contract MyEpicNFT is ERC721URIStorage, Ownable {
 
     // NFT トークンの名前とそのシンボルを渡します。
     constructor() ERC721("SquareNFT", "SQUARE") {
+        royaltyAddress = msg.sender;
+        _setDefaultRoyalty(msg.sender, royaltyFee);
+        console.log("royaltyAddress : ", royaltyAddress);
         console.log("This is my NFT contract.");
     }
 
@@ -231,5 +239,38 @@ contract MyEpicNFT is ERC721URIStorage, Ownable {
         _tokenIds.increment();
 
         emit NewEpicNFTMinted(msg.sender, newItemId);
+    }
+
+    /**
+     * @notice Change the royalty fee for the collection
+     */
+    function setRoyaltyFee(uint96 _feeNumerator) external onlyOwner {
+        royaltyFee = _feeNumerator;
+        _setDefaultRoyalty(royaltyAddress, royaltyFee);
+    }
+
+    /**
+     * @notice Change the royalty address where royalty payouts are sent
+     */
+    function setRoyaltyAddress(address _royaltyAddress) external onlyOwner {
+        royaltyAddress = _royaltyAddress;
+        _setDefaultRoyalty(royaltyAddress, royaltyFee);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721, ERC2981)
+        returns (bool)
+    {
+        // Supports the following `interfaceId`s:
+        // - IERC165: 0x01ffc9a7
+        // - IERC721: 0x80ac58cd
+        // - IERC721Metadata: 0x5b5e139f
+        // - IERC2981: 0x2a55205a
+        return
+            ERC721.supportsInterface(interfaceId) ||
+            ERC2981.supportsInterface(interfaceId);
     }
 }
