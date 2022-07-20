@@ -4,6 +4,7 @@ pragma solidity ^0.8.4;
 
 // いくつかの OpenZeppelin のコントラクトをインポートします。
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 // utils ライブラリをインポートして文字列の処理を行います。
@@ -16,7 +17,7 @@ import {Base64} from "./libraries/Base64.sol";
 
 // インポートした OpenZeppelin のコントラクトを継承しています。
 // 継承したコントラクトのメソッドにアクセスできるようになります。
-contract MyEpicNFT is ERC721URIStorage {
+contract MyEpicNFT is ERC721URIStorage, Ownable {
     // OpenZeppelin が tokenIds を簡単に追跡するために提供するライブラリを呼び出しています
     using Counters for Counters.Counter;
 
@@ -149,6 +150,14 @@ contract MyEpicNFT is ERC721URIStorage {
         );
         rand = rand % thirdWords.length;
         return thirdWords[rand];
+    }
+
+    function withdraw() public payable onlyOwner {
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No ether left to withdraw");
+
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "Transfer failed.");
     }
 
     // ユーザーが NFT を取得するために実行する関数です。
