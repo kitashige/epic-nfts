@@ -171,6 +171,11 @@ contract MyEpicNFT is ERC721URIStorage, ERC2981, Ownable {
         require(success, "Transfer failed.");
     }
 
+    function getLastTokenId() public view returns (uint256) {
+        uint256 lastTokenId = _tokenIds.current();
+        return lastTokenId;
+    }
+
     // ユーザーが NFT を取得するために実行する関数です。
     function makeAnEpicNFT() public payable {
         // 現在のtokenIdを取得します。tokenIdは0から始まります。

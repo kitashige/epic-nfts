@@ -76,6 +76,7 @@ describe("MyEpicNFT contract", function () {
                 await txn.wait();
             }
         });
+
         it("Total Mint Test NG", async function () {
             const { hardhatToken, addr1 } = await loadFixture(deployTokenFixture);
             var totalMintCount = 100;
@@ -92,6 +93,22 @@ describe("MyEpicNFT contract", function () {
                 value: ethers.utils.parseEther("0.001"),
             })).to.be.rejected
         });
+
+        it("Get Total Supply", async function () {
+            const { hardhatToken, addr1 } = await loadFixture(deployTokenFixture);
+            var totalMintCount = 5;
+            for (let index = 0; index < totalMintCount; index++) {
+                // makeAnEpicNFT 関数を呼び出す。NFT が Mint される。
+                let txn = await hardhatToken.makeAnEpicNFT({
+                    value: ethers.utils.parseEther("0.001"),
+                });
+                // Minting が仮想マイナーにより、承認されるのを待つ。
+                await txn.wait();
+            }
+            var result = await hardhatToken.getLastTokenId();
+            expect(result).to.equal(totalMintCount);
+        });
+
     });
 
 
