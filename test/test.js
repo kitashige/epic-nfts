@@ -1,7 +1,9 @@
-const { expect } = require("chai");
+const chai = require('chai')
+const expect = chai.expect
+const chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
 
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
-
 
 describe("MyEpicNFT contract", function () {
 
@@ -60,4 +62,37 @@ describe("MyEpicNFT contract", function () {
         });
 
     });
+
+    describe("Mint Test", function () {
+        it("Total Mint Test OK", async function () {
+            const { hardhatToken, addr1 } = await loadFixture(deployTokenFixture);
+            var totalMintCount = 100;
+            for (let index = 0; index < totalMintCount; index++) {
+                // makeAnEpicNFT 関数を呼び出す。NFT が Mint される。
+                let txn = await hardhatToken.makeAnEpicNFT({
+                    value: ethers.utils.parseEther("0.001"),
+                });
+                // Minting が仮想マイナーにより、承認されるのを待つ。
+                await txn.wait();
+            }
+        });
+        it("Total Mint Test NG", async function () {
+            const { hardhatToken, addr1 } = await loadFixture(deployTokenFixture);
+            var totalMintCount = 100;
+            for (let index = 0; index < totalMintCount; index++) {
+                // makeAnEpicNFT 関数を呼び出す。NFT が Mint される。
+                let txn = await hardhatToken.makeAnEpicNFT({
+                    value: ethers.utils.parseEther("0.001"),
+                });
+                // Minting が仮想マイナーにより、承認されるのを待つ。
+                await txn.wait();
+            }
+            //101個目をミントしてエラーになること
+            await expect(hardhatToken.makeAnEpicNFT({
+                value: ethers.utils.parseEther("0.001"),
+            })).to.be.rejected
+        });
+    });
+
+
 });

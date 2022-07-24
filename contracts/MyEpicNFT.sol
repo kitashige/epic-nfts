@@ -32,6 +32,9 @@ contract MyEpicNFT is ERC721URIStorage, ERC2981, Ownable {
     address public royaltyAddress;
     uint96 public royaltyFee = 500;
 
+    //ミント最大数
+    uint256 public constant MAX_SUPPLY = 100;
+
     // SVGコードを作成します。
     // 変更されるのは、表示される単語だけです。
     // すべてのNFTにSVGコードを適用するために、baseSvg変数を作成します。
@@ -172,6 +175,9 @@ contract MyEpicNFT is ERC721URIStorage, ERC2981, Ownable {
     function makeAnEpicNFT() public payable {
         // 現在のtokenIdを取得します。tokenIdは0から始まります。
         uint256 newItemId = _tokenIds.current();
+
+        //上限数チェック
+        require(newItemId < MAX_SUPPLY, "MAX_SUPPLY over");
 
         //MINT時の購入価格をチェックする
         require(msg.value >= mintCost, "Not enough ether to purchase NFTs.");
